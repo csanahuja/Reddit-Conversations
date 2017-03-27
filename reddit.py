@@ -6,22 +6,12 @@ from private import Credentials
 #Global vars
 output = open('reddit.txt', 'w+')
 
-def debug(comments, comments2, index):
-    print len(comments)
-    print len(comments2)
-    for c in comments:
-        print "c1 " + c.body.encode('utf-8')
-    for c in comments2:
-        print "c2 " + c.body.encode('utf-8')
-
 def printCommentAndReplies(comments, i = 0, level=0):
     index = 0
     for comment in comments:
         if isinstance(comment, MoreComments):
             comments.replace_more()
             return printCommentAndReplies(comments[index:], i, level)
-
-            #debug(comments, comments[index:], index)
         else:
             i += 1
             index += 1
@@ -43,6 +33,7 @@ if __name__ == '__main__' :
     #print reddit.user.me()
 
     conversation_id = "6187ay"
+    conversation_id = "61rcv8"
     conversation_url = "https://www.reddit.com/r/news/comments/6187ay/couple_donates_bug_collection_worth_10m_a/"
 
     submission = reddit.submission(id=conversation_id)
