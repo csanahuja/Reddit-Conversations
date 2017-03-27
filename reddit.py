@@ -1,7 +1,9 @@
 # -- coding: utf-8 --
 import praw
 from praw.models import MoreComments
+from private import Credentials
 
+#Global vars
 i = 1
 output = open('reddit.txt', 'w+')
 
@@ -18,7 +20,12 @@ def printCommentAndReplies(comment, i):
     return i
 
 if __name__ == '__main__' :
-
+    cdr = Credentials()
+    reddit = praw.Reddit(client_id=cdr.client_id,
+                         client_secret=cdr.client_secret,
+                         user_agent=cdr.user_agent,
+                         username=cdr.username,
+                         password=cdr.password)
 
 
     #print reddit.user.me()
