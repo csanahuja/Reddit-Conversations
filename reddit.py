@@ -4,20 +4,32 @@ from praw.models import MoreComments
 from private import Credentials
 
 #Global vars
-i = 1
 output = open('reddit.txt', 'w+')
 
-def printCommentAndReplies(comment, i):
-    if isinstance(comment, MoreComments):
-        for more in comment.comments():
-            pass
-    else:
-        output.write(str(i) + ": " + comment.body.encode('utf-8') + "\n")
-        i += 1
+def debug(comments, comments2, index):
+    print len(comments)
+    print len(comments2)
+    for c in comments:
+        print "c1 " + c.body.encode('utf-8')
+    for c in comments2:
+        print "c2 " + c.body.encode('utf-8')
 
-        for reply in comment.replies.replace_more():
-            i = printCommentAndReplies(reply, i)
+def printCommentAndReplies(comments, i = 0, level=0):
+    index = 0
+    for comment in comments:
+        if isinstance(comment, MoreComments):
+            comments.replace_more()
+            return printCommentAndReplies(comments[index:], i, level)
+
+            #debug(comments, comments[index:], index)
+        else:
+            i += 1
+            index += 1
+            output.write("LEVEL: " + str(level) + " NUMº: " + str(i) +
+                        " BODY: " + comment.body.encode('utf-8') + "\n")
+            i = printCommentAndReplies(comment.replies, i, level+1)
     return i
+
 
 if __name__ == '__main__' :
     cdr = Credentials()
@@ -31,14 +43,10 @@ if __name__ == '__main__' :
     #print reddit.user.me()
 
     conversation_id = "6187ay"
-    # conversation_id = "618nlp"
     conversation_url = "https://www.reddit.com/r/news/comments/6187ay/couple_donates_bug_collection_worth_10m_a/"
 
     submission = reddit.submission(id=conversation_id)
     # submission = reddit.submission(url=conversation_url)
 
-    top_comments = submission.comments
-
-    for comment in top_comments.replace_more(limit=2):
-         i = printCommentAndReplies(comment, i)
-    print i
+    i = printCommentAndReplies(submission.comments)
+    print "Readed comments:" + str(i)
