@@ -44,6 +44,9 @@ def saveMessage(comment):
     json_data = json.dumps(message)
     json_file.write(json_data + "\n")
 
+def saveSubmission(submission):
+    pass
+
 
 # For debug purposes
 def saveRawText(comment):
@@ -59,12 +62,19 @@ if __name__ == '__main__' :
                          username=cdr.username,
                          password=cdr.password)
 
-    #conversation_id = "6187ay"
-    conversation_id = "61otjc"
+    conversation_id = "6187ay"
     conversation_url = "https://www.reddit.com/r/news/comments/6187ay/couple_donates_bug_collection_worth_10m_a/"
 
     submission = reddit.submission(id=conversation_id)
     # submission = reddit.submission(url=conversation_url)
+    print submission.url
+    print dir(submission)
+    print submission.ups
+    print submission.downs
+    print submission.over_18
+    print submission.locked
+    print submission.upvote_ratio
+    print submission.selftext
 
     print "STARTED: Reading the Conversation"
     print "Expected " + str(submission.num_comments) + \
