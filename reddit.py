@@ -44,8 +44,20 @@ def saveMessage(comment):
     json_data = json.dumps(message)
     json_file.write(json_data + "\n")
 
+
 def saveSubmission(submission):
-    pass
+    # print dir(submission)
+    message = {}
+    message['id'] = submission.id
+    message['url'] = submission.url
+    message['votes'] = submission.ups
+    # Check attribute
+    # message['upvote_ratio'] = submission.ratio
+    message['author'] = submission.author.name
+    message['text'] = submission.selftext
+    message['parent'] = "ROOT"
+    json_data = json.dumps(message)
+    json_file.write(json_data + "\n")
 
 
 # For debug purposes
@@ -65,16 +77,9 @@ if __name__ == '__main__' :
     conversation_id = "6187ay"
     conversation_url = "https://www.reddit.com/r/news/comments/6187ay/couple_donates_bug_collection_worth_10m_a/"
 
+    # Either get submission by ID or URL
     submission = reddit.submission(id=conversation_id)
     # submission = reddit.submission(url=conversation_url)
-    print submission.url
-    print dir(submission)
-    print submission.ups
-    print submission.downs
-    print submission.over_18
-    print submission.locked
-    print submission.upvote_ratio
-    print submission.selftext
 
     print "STARTED: Reading the Conversation"
     print "Expected " + str(submission.num_comments) + \
