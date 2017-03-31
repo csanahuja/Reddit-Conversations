@@ -1,6 +1,7 @@
 # -- coding: utf-8 --
 import praw
 import json
+import argparse
 from praw.models import MoreComments
 from private import Credentials
 
@@ -67,22 +68,43 @@ def saveRawText(comment):
 
 
 if __name__ == '__main__' :
-    cdr = Credentials()
+
+    # DEFAULT VALUES
+    conversation_id = "6187ay"
+    conversation_url = "https://www.reddit.com/r/news/comments/6187ay/couple_donates_bug_collection_worth_10m_a/"
+    credentials_file = "credentials.txt"
+
+    # Parse arguments
+    parser = argparse.ArgumentParser(description = 'Parser for reddit.py')
+    parser.add_argument('-u','--url', default = conversation_url, type = str, help = 'URL of Conversation', dest = 'url')
+    parser.add_argument('-i','--id', default = conversation_id, type = str, help = 'ID of Conversation', dest = 'id')
+    parser.add_argument('-c','--credentials', default = credentials_file, type = str, help = 'Credentials of API', dest = 'credentials_file')
+    parser.add_argument('-l', '--link', default = False, action = "store_true", help = 'Use URL of Conversation, default ID', dest = 'use_link')
+    args = parser.parse_args()
+
+    print args.use_link
+
+    cdr = Credentials(credentials_file)
     reddit = praw.Reddit(client_id=cdr.client_id,
                          client_secret=cdr.client_secret,
                          user_agent=cdr.user_agent,
                          username=cdr.username,
                          password=cdr.password)
 
-    conversation_id = "6187ay"
-    conversation_url = "https://www.reddit.com/r/news/comments/6187ay/couple_donates_bug_collection_worth_10m_a/"
+    try:
+        # Either get submission by ID or URL
+        if args.use_link:
+            submission = reddit.submission(url=conversation_url)
+        else:
+            submission = reddit.submission(id=conversation_id)
 
-    # Either get submission by ID or URL
-    submission = reddit.submission(id=conversation_id)
-    # submission = reddit.submission(url=conversation_url)
+        saveSubmission(submission)
 
-    print "STARTED: Reading the Conversation"
-    print "Expected " + str(submission.num_comments) + \
-          " Comments (On large conversations the expected number is not reached)"
-    i = printCommentAndReplies(submission.comments)
-    print "ENDED: Readed " + str(i) + " Comments"
+        # Start reading and parsing the Conversation
+        print "STARTED: Reading the Conversation"
+        print "Expected " + str(submission.num_comments) + \
+              " Comments (On large conversations the expected number is not reached)"
+        i = printCommentAndReplies(submission.comments)
+        print "ENDED: Readed " + str(i) + " Comments"
+    except Exception:
+        print "Reddit API failed. Check Internet connectivity and credentials"

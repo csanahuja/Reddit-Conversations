@@ -10,9 +10,8 @@ class Credentials:
     Check https://praw.readthedocs.io/en/latest/ to known how to get the values
     """
 
-    def __init__(self):
-        private_file = "credentials.txt"
-        for line in open(private_file,'r'):
+    def __init__(self, credentials):
+        for line in open(credentials,'r'):
             line_args = line.split()
 
             if line_args[0] == "username":
