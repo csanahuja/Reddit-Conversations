@@ -2,6 +2,7 @@
 import praw
 import json
 import argparse
+import sys
 from praw.models import MoreComments
 from private import Credentials
 
@@ -60,7 +61,7 @@ def saveSubmission(submission):
     message['url'] = submission.url
     message['ratio'] = submission.upvote_ratio
     # message['ratio'] = submission.ratio
-    message['author'] = long(submission.author.id,36)
+    message['author'] = long(submission.author.id,64)
     message['author_name'] = submission.author.name
     message['text'] = submission.selftext
     message['parent'] = 0
@@ -93,6 +94,11 @@ if __name__ == '__main__' :
                          user_agent=cdr.user_agent,
                          username=cdr.username,
                          password=cdr.password)
+
+    # Get ID from stdin sended by Scala
+    # Comment this line if you are not calling it from scala
+    args.id = sys.stdin.readline()
+
 
     try:
         # Either get submission by ID or URL
