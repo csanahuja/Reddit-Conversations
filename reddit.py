@@ -70,9 +70,9 @@ def saveRawText(comment):
 if __name__ == '__main__' :
 
     # DEFAULT VALUES
+    credentials_file = "credentials.txt"
     conversation_id = "6187ay"
     conversation_url = "https://www.reddit.com/r/news/comments/6187ay/couple_donates_bug_collection_worth_10m_a/"
-    credentials_file = "credentials.txt"
 
     # Parse arguments
     parser = argparse.ArgumentParser(description = 'Parser for reddit.py')
@@ -82,9 +82,7 @@ if __name__ == '__main__' :
     parser.add_argument('-l', '--link', default = False, action = "store_true", help = 'Use URL of Conversation, default ID', dest = 'use_link')
     args = parser.parse_args()
 
-    print args.use_link
-
-    cdr = Credentials(credentials_file)
+    cdr = Credentials(args.credentials_file)
     reddit = praw.Reddit(client_id=cdr.client_id,
                          client_secret=cdr.client_secret,
                          user_agent=cdr.user_agent,
@@ -94,9 +92,9 @@ if __name__ == '__main__' :
     try:
         # Either get submission by ID or URL
         if args.use_link:
-            submission = reddit.submission(url=conversation_url)
+            submission = reddit.submission(url=args.url)
         else:
-            submission = reddit.submission(id=conversation_id)
+            submission = reddit.submission(id=args.id)
 
         saveSubmission(submission)
 
@@ -107,4 +105,4 @@ if __name__ == '__main__' :
         i = printCommentAndReplies(submission.comments)
         print "ENDED: Readed " + str(i) + " Comments"
     except Exception:
-        print "Reddit API failed. Check Internet connectivity and credentials"
+        print "Reddit API failed. Check Internet connectivity and credentials / parameters"
