@@ -1,4 +1,6 @@
-# -- coding: utf-8 --
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+# vim: set fileencoding=utf8 :
 import praw
 import json
 import argparse
@@ -7,9 +9,16 @@ from praw.models import MoreComments
 from private import Credentials
 
 #Global vars
-txt_file = open('reddit.txt', 'w+')
-json_file = open('reddit.json','w+')
-json_data = None
+SCALA_FLAG = True
+
+
+if SCALA_FLAG:
+    scala_path = "Downloaders/reddit-collector/"
+    txt_file = open(scala_path + "reddit.txt", 'w+')
+    json_file = open(scala_path + "reddit.json", 'w+')
+else:
+    txt_file = open('reddit.txt', 'w+')
+    json_file = open('reddit.json','w+')
 
 # Alg. to get all messages
 def getCommentAndReplies(comments, i = 0, level=1):
@@ -29,8 +38,6 @@ def getCommentAndReplies(comments, i = 0, level=1):
 
 # Save message as JSON
 def saveMessage(comment):
-    global json_data
-
     #Uncomment to save raw text messages
     #saveRawText(comment)
 
@@ -54,14 +61,11 @@ def saveMessage(comment):
 
 # Save the submission message
 def saveSubmission(submission):
-
-
     message = {}
     message['id'] = long(int(submission.id,36))
     message['url'] = submission.url
     message['ratio'] = submission.upvote_ratio
-    # message['ratio'] = submission.ratio
-    message['author'] = long(submission.author.id,64)
+    message['author'] = long(submission.author.id,36)
     message['author_name'] = submission.author.name
     message['text'] = submission.selftext
     message['parent'] = 0
@@ -88,7 +92,13 @@ if __name__ == '__main__' :
     parser.add_argument('-l', '--link', default = False, action = "store_true", help = 'Use URL of Conversation, default ID', dest = 'use_link')
     args = parser.parse_args()
 
-    cdr = Credentials(args.credentials_file)
+
+    if SCALA_FLAG:
+        cdr = Credentials(scala_path + args.credentials_file)
+
+    else:
+        cdr = Credentials(args.credentials_file)
+
     reddit = praw.Reddit(client_id=cdr.client_id,
                          client_secret=cdr.client_secret,
                          user_agent=cdr.user_agent,
@@ -96,16 +106,18 @@ if __name__ == '__main__' :
                          password=cdr.password)
 
     # Get ID from stdin sended by Scala
-    # Comment this line if you are not calling it from scala
-    args.id = sys.stdin.readline()
-
+    if SCALA_FLAG:
+        conversation_id = sys.stdin.readline().rstrip('\n')
 
     try:
-        # Either get submission by ID or URL
-        if args.use_link:
-            submission = reddit.submission(url=args.url)
+        if SCALA_FLAG:
+            submission = reddit.submission(id=conversation_id)
         else:
-            submission = reddit.submission(id=args.id)
+            # Either get submission by ID or URL
+            if args.use_link:
+                submission = reddit.submission(url=args.url)
+            else:
+                submission = reddit.submission(id=args.id)
 
         saveSubmission(submission)
 
