@@ -11,19 +11,19 @@ json_file = open('reddit.json','w+')
 json_data = None
 
 # Alg. to get all messages
-def printCommentAndReplies(comments, i = 0, level=1):
+def getCommentAndReplies(comments, i = 0, level=1):
     index = 0
     for comment in comments:
         if isinstance(comment, MoreComments):
             comments.replace_more()
-            return printCommentAndReplies(comments[index:], i, level)
+            return getCommentAndReplies(comments[index:], i, level)
         else:
             i += 1
             index += 1
             if i%100 == 0:
                 print "Readed " + str(i) + " Comments"
             saveMessage(comment)
-            i = printCommentAndReplies(comment.replies, i, level+1)
+            i = getCommentAndReplies(comment.replies, i, level+1)
     return i
 
 # Save message as JSON
@@ -35,37 +35,42 @@ def saveMessage(comment):
 
     #Save Json
     message = {}
-    message['id'] = comment.id
-    try:
-        message['author'] = comment.author.name
-    except AttributeError:
-        message['author'] = 'deleted'
+
+    message['id'] = long(comment.id, 36)
     message['text'] = comment.body.encode('utf-8')
-    message['parent'] = comment.parent().id
+    message['parent'] = long(int(comment.parent().id,36))
+
+    # Get Author if message not deleted
+    try:
+        message['author'] = long(comment.author.id,36)
+        message['author_name'] = comment.author.name
+    except AttributeError:
+        message['author'] = -1
+        message['author_name'] = 'deleted'
+
     json_data = json.dumps(message)
     json_file.write(json_data + "\n")
 
-
+# Save the submission message
 def saveSubmission(submission):
-    # print dir(submission)
+
+
     message = {}
-    message['id'] = submission.id
+    message['id'] = long(int(submission.id,36))
     message['url'] = submission.url
-    message['votes'] = submission.ups
-    # Check attribute
-    # message['upvote_ratio'] = submission.ratio
-    message['author'] = submission.author.name
+    message['ratio'] = submission.upvote_ratio
+    # message['ratio'] = submission.ratio
+    message['author'] = long(submission.author.id,36)
+    message['author_name'] = submission.author.name
     message['text'] = submission.selftext
-    message['parent'] = "ROOT"
+    message['parent'] = 0
     json_data = json.dumps(message)
     json_file.write(json_data + "\n")
-
 
 # For debug purposes
 def saveRawText(comment):
     txt_file.write("LEVEL: " + str(level) + " NUMº: " + str(i) +
                    " BODY: " + comment.body.encode('utf-8') + "\n")
-
 
 if __name__ == '__main__' :
 
@@ -102,7 +107,7 @@ if __name__ == '__main__' :
         print "STARTED: Reading the Conversation"
         print "Expected " + str(submission.num_comments) + \
               " Comments (On large conversations the expected number is not reached)"
-        i = printCommentAndReplies(submission.comments)
+        i = getCommentAndReplies(submission.comments)
         print "ENDED: Readed " + str(i) + " Comments"
-    except Exception:
-        print "Reddit API failed. Check Internet connectivity and credentials / parameters"
+    except Exception as e:
+        print "Error:" + str(e)
