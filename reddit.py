@@ -9,7 +9,7 @@ from praw.models import MoreComments
 from private import Credentials
 
 #Global vars
-SCALA_FLAG = True
+SCALA_FLAG = False
 
 
 if SCALA_FLAG:
